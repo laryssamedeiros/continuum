@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BookOpen, MessageSquare, Bot, Sparkles, ChevronDown, Lightbulb, AlertTriangle } from "lucide-react";
 
 type ExportGuideProps = {
   darkMode: boolean;
@@ -25,7 +26,7 @@ export default function ExportGuide({ darkMode }: ExportGuideProps) {
         className="w-full flex items-center justify-between text-left"
       >
         <div className="flex items-center gap-3">
-          <div className="text-2xl">📚</div>
+          <BookOpen className="w-6 h-6" />
           <div>
             <h2 className="text-xl font-bold">How to Export Your AI Chat History</h2>
             <p className="text-sm opacity-70 mt-1">
@@ -33,9 +34,7 @@ export default function ExportGuide({ darkMode }: ExportGuideProps) {
             </p>
           </div>
         </div>
-        <div className={`text-2xl transition-transform ${isExpanded ? "rotate-180" : ""}`}>
-          ▼
-        </div>
+        <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
       </button>
 
       {isExpanded && (
@@ -44,27 +43,30 @@ export default function ExportGuide({ darkMode }: ExportGuideProps) {
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTab("chatgpt")}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-smooth ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-smooth flex items-center gap-2 ${
                 activeTab === "chatgpt" ? tabActiveClasses : tabInactiveClasses
               }`}
             >
-              💬 ChatGPT
+              <MessageSquare className="w-4 h-4" />
+              ChatGPT
             </button>
             <button
               onClick={() => setActiveTab("claude")}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-smooth ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-smooth flex items-center gap-2 ${
                 activeTab === "claude" ? tabActiveClasses : tabInactiveClasses
               }`}
             >
-              🤖 Claude
+              <Bot className="w-4 h-4" />
+              Claude
             </button>
             <button
               onClick={() => setActiveTab("gemini")}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-smooth ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-smooth flex items-center gap-2 ${
                 activeTab === "gemini" ? tabActiveClasses : tabInactiveClasses
               }`}
             >
-              ✨ Gemini
+              <Sparkles className="w-4 h-4" />
+              Gemini
             </button>
           </div>
 
@@ -73,7 +75,8 @@ export default function ExportGuide({ darkMode }: ExportGuideProps) {
             {activeTab === "chatgpt" && (
               <div className="space-y-4">
                 <h3 className="text-lg font-bold flex items-center gap-2">
-                  💬 Export from ChatGPT
+                  <MessageSquare className="w-5 h-5" />
+                  Export from ChatGPT
                 </h3>
 
                 <div className="space-y-3 text-sm">
@@ -139,8 +142,9 @@ export default function ExportGuide({ darkMode }: ExportGuideProps) {
                 </div>
 
                 <div className={`mt-4 p-3 rounded-lg ${darkMode ? "bg-blue-500/10 border border-blue-500/20" : "bg-blue-50 border border-blue-200"}`}>
-                  <p className="text-xs">
-                    <strong>💡 Tip:</strong> The ZIP contains <code className="px-1.5 py-0.5 rounded bg-black/10">conversations.json</code> with your FULL chat history.
+                  <p className="text-xs flex items-start gap-2">
+                    <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span><strong>Tip:</strong> The ZIP contains <code className="px-1.5 py-0.5 rounded bg-black/10">conversations.json</code> with your FULL chat history.</span>
                   </p>
                 </div>
               </div>
@@ -149,7 +153,8 @@ export default function ExportGuide({ darkMode }: ExportGuideProps) {
             {activeTab === "claude" && (
               <div className="space-y-4">
                 <h3 className="text-lg font-bold flex items-center gap-2">
-                  🤖 Export from Claude
+                  <Bot className="w-5 h-5" />
+                  Export from Claude
                 </h3>
 
                 <div className="space-y-3 text-sm">
@@ -215,14 +220,16 @@ export default function ExportGuide({ darkMode }: ExportGuideProps) {
                 </div>
 
                 <div className={`mt-4 p-3 rounded-lg ${darkMode ? "bg-amber-500/10 border border-amber-500/20" : "bg-amber-50 border border-amber-200"}`}>
-                  <p className="text-xs">
-                    <strong>⚠️ Note:</strong> Claude exports are only available on web/desktop, not mobile apps.
+                  <p className="text-xs flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span><strong>Note:</strong> Claude exports are only available on web/desktop, not mobile apps.</span>
                   </p>
                 </div>
 
                 <div className={`p-3 rounded-lg ${darkMode ? "bg-blue-500/10 border border-blue-500/20" : "bg-blue-50 border border-blue-200"}`}>
-                  <p className="text-xs">
-                    <strong>💡 Alternative:</strong> Use the{" "}
+                  <p className="text-xs flex items-start gap-2">
+                    <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span><strong>Alternative:</strong> Use the{" "}
                     <a
                       href="https://chromewebstore.google.com/detail/claude-exporter-save-clau/elhmfakncmnghlnabnolalcjkdpfjnin"
                       target="_blank"
@@ -231,7 +238,7 @@ export default function ExportGuide({ darkMode }: ExportGuideProps) {
                     >
                       Claude Exporter extension
                     </a>{" "}
-                    to export individual conversations as Markdown.
+                    to export individual conversations as Markdown.</span>
                   </p>
                 </div>
               </div>
@@ -240,12 +247,14 @@ export default function ExportGuide({ darkMode }: ExportGuideProps) {
             {activeTab === "gemini" && (
               <div className="space-y-4">
                 <h3 className="text-lg font-bold flex items-center gap-2">
-                  ✨ Export from Gemini
+                  <Sparkles className="w-5 h-5" />
+                  Export from Gemini
                 </h3>
 
                 <div className={`p-4 rounded-lg ${darkMode ? "bg-amber-500/10 border border-amber-500/20" : "bg-amber-50 border border-amber-200"}`}>
-                  <p className="text-sm">
-                    <strong>⚠️ No native export yet:</strong> Google Gemini doesn't have a built-in export feature. Use one of these methods:
+                  <p className="text-sm flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span><strong>No native export yet:</strong> Google Gemini doesn't have a built-in export feature. Use one of these methods:</span>
                   </p>
                 </div>
 
@@ -346,8 +355,9 @@ export default function ExportGuide({ darkMode }: ExportGuideProps) {
                 </div>
 
                 <div className={`mt-4 p-3 rounded-lg ${darkMode ? "bg-blue-500/10 border border-blue-500/20" : "bg-blue-50 border border-blue-200"}`}>
-                  <p className="text-xs">
-                    <strong>💡 Tip:</strong> Browser extensions are the easiest way to export all Gemini conversations at once.
+                  <p className="text-xs flex items-start gap-2">
+                    <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span><strong>Tip:</strong> Browser extensions are the easiest way to export all Gemini conversations at once.</span>
                   </p>
                 </div>
               </div>
