@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/upload-files/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}

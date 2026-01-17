@@ -3,7 +3,8 @@ import OpenAI from "openai";
 import { parseUploadedFiles } from "../../../lib/parseFiles";
 
 export const runtime = "nodejs";          // allow Node APIs for JSZip
-export const maxDuration = 60;            // give this route up to 60s
+export const maxDuration = 60;            // give this route up to 60s (requires Vercel Pro)
+export const dynamic = "force-dynamic";   // disable static optimization
 
 function getOpenAIClient() {
   return new OpenAI({
@@ -81,14 +82,15 @@ export async function POST(req: NextRequest) {
     }
 
     // 2) Aggressive truncation/sampling so we never overload OpenAI
-    // Rough: 4 chars ≈ 1 token. 10k chars ≈ 2500 tokens → fast & cheap.
-    const MAX_CHARS = 10_000;
+    // Rough: 4 chars ≈ 1 token. 8k chars ≈ 2000 tokens → fast & cheap.
+    // Optimized for Vercel free tier (10s timeout)
+    const MAX_CHARS = 8_000;
 
     let textForModel = unifiedHistory;
     let truncated = false;
 
     if (textForModel.length > MAX_CHARS) {
-      const headSize = 7_000;
+      const headSize = 5_000;
       const tailSize = 2_000;
 
       const head = textForModel.slice(0, headSize);
@@ -149,8 +151,10 @@ User AI history:
 `.trim();
 
     // 3) Call OpenAI with JSON mode and a compact model
+    // Add timeout to fail fast on Vercel free tier (10s limit)
     const openai = getOpenAIClient();
-    const completion = await openai.chat.completions.create({
+
+    const completionPromise = openai.chat.completions.create({
       model: "gpt-4.1-mini",
       temperature: 0.1,
       response_format: { type: "json_object" },
@@ -162,7 +166,10 @@ User AI history:
         },
         { role: "user", content: prompt },
       ],
+      timeout: 8000, // 8 second timeout for OpenAI API call
     });
+
+    const completion = await completionPromise;
 
     const content = completion.choices[0]?.message?.content;
     if (!content) {
@@ -203,9 +210,14 @@ User AI history:
   } catch (err: any) {
     console.error("UPLOAD-FILES API ERROR:", err);
 
-    const msg =
-      err?.message ||
-      "Internal server error while extracting your identity graph.";
+    let msg = "Internal server error while extracting your identity graph.";
+
+    // Provide better error messages for common issues
+    if (err?.code === "ETIMEDOUT" || err?.message?.includes("timeout")) {
+      msg = "Processing timeout. Try a smaller file or upgrade to Vercel Pro for longer processing times.";
+    } else if (err?.message) {
+      msg = err.message;
+    }
 
     return NextResponse.json({ error: msg }, { status: 500 });
   }
