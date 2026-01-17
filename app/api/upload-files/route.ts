@@ -5,9 +5,11 @@ import { parseUploadedFiles } from "../../../lib/parseFiles";
 export const runtime = "nodejs";          // allow Node APIs for JSZip
 export const maxDuration = 60;            // give this route up to 60s
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+function getOpenAIClient() {
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY!,
+  });
+}
 
 // Helper: build human-readable profile text from JSON
 function buildProfileText(profileJson: any): string {
@@ -147,6 +149,7 @@ User AI history:
 `.trim();
 
     // 3) Call OpenAI with JSON mode and a compact model
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       temperature: 0.1,
