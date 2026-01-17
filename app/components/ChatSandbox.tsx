@@ -26,7 +26,7 @@ export default function ChatSandbox({ profileJson, darkMode }: ChatSandboxProps)
     const trimmed = input.trim();
     if (!trimmed || loading) return;
 
-    const newMessages = [...messages, { role: "user", content: trimmed }];
+    const newMessages: SandboxMessage[] = [...messages, { role: "user" as const, content: trimmed }];
     setMessages(newMessages);
     setInput("");
     setLoading(true);

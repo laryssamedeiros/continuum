@@ -40,7 +40,7 @@ export async function deriveKeyFromPassphrase(
   return crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt: salt,
+      salt: salt as BufferSource,
       iterations: PBKDF2_ITERATIONS,
       hash: "SHA-256",
     },
@@ -74,7 +74,7 @@ export async function encryptData(
   const encryptedBuffer = await crypto.subtle.encrypt(
     {
       name: "AES-GCM",
-      iv: iv,
+      iv: iv as BufferSource,
     },
     key,
     encoder.encode(data)
@@ -110,10 +110,10 @@ export async function decryptData(
     const decryptedBuffer = await crypto.subtle.decrypt(
       {
         name: "AES-GCM",
-        iv: ivBuffer,
+        iv: ivBuffer as BufferSource,
       },
       key,
-      encryptedBuffer
+      encryptedBuffer as BufferSource
     );
 
     // Convert back to string
@@ -236,8 +236,8 @@ export async function hashPassphraseForVerification(
 
 // Helper functions
 
-function bufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
+function bufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
   let binary = "";
   for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i]);

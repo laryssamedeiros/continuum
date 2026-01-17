@@ -1,15 +1,62 @@
 import JSZip from "jszip";
 
 /**
+ * Detect which LLM the export came from based on file structure and content
+ */
+function detectSource(files: File[], zipContents?: { [path: string]: any }): "chatgpt" | "claude" | "gemini" | "unknown" {
+  // Check ZIP contents first (most reliable)
+  if (zipContents) {
+    const paths = Object.keys(zipContents).map(p => p.toLowerCase());
+
+    // ChatGPT exports have conversations.json or messages.json
+    if (paths.some(p => p.includes("conversations.json") || p.includes("messages.json"))) {
+      return "chatgpt";
+    }
+
+    // Claude exports typically have .dms files or specific JSON structure
+    if (paths.some(p => p.endsWith(".dms") || p.includes("claude"))) {
+      return "claude";
+    }
+  }
+
+  // Check individual file names
+  for (const file of files) {
+    const lowerName = file.name.toLowerCase();
+
+    // ChatGPT patterns
+    if (lowerName.includes("chatgpt") || lowerName.includes("conversations.json")) {
+      return "chatgpt";
+    }
+
+    // Claude patterns
+    if (lowerName.includes("claude") || lowerName.endsWith(".dms")) {
+      return "claude";
+    }
+
+    // Gemini patterns
+    if (lowerName.includes("gemini") || lowerName.includes("bard")) {
+      return "gemini";
+    }
+  }
+
+  return "unknown";
+}
+
+/**
  * Given an array of uploaded File objects (from the browser),
- * return a single unified plain-text "history" string.
+ * return a single unified plain-text "history" string and detected source.
  *
  * Supports:
  * - .zip (ChatGPT export or similar)
  * - .txt, .json, .md, .html, .htm
  */
-export async function parseUploadedFiles(files: File[]): Promise<string> {
+export async function parseUploadedFiles(files: File[]): Promise<{
+  text: string;
+  source: "chatgpt" | "claude" | "gemini" | "unknown";
+}> {
   const chunks: string[] = [];
+  let detectedSource: "chatgpt" | "claude" | "gemini" | "unknown" = "unknown";
+  let zipContents: { [path: string]: any } | undefined;
 
   for (const file of files) {
     const lowerName = file.name.toLowerCase();
@@ -18,6 +65,7 @@ export async function parseUploadedFiles(files: File[]): Promise<string> {
     if (lowerName.endsWith(".zip")) {
       const buf = await file.arrayBuffer();
       const zip = await JSZip.loadAsync(buf);
+      zipContents = zip.files;
 
       // Iterate over entries inside the zip
       const entries = Object.entries(zip.files);
@@ -49,7 +97,13 @@ export async function parseUploadedFiles(files: File[]): Promise<string> {
     }
   }
 
-  return chunks.join("\n").trim();
+  // Detect source
+  detectedSource = detectSource(files, zipContents);
+
+  return {
+    text: chunks.join("\n").trim(),
+    source: detectedSource,
+  };
 }
 
 /**

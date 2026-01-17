@@ -1,21 +1,19 @@
 "use client";
 
 import React, { useState, useEffect, DragEvent, ChangeEvent } from "react";
-import { Upload, X, File } from "lucide-react";
 
 type FileUploaderProps = {
   onResult: (data: { profileText: string; profileJson: any; source?: string }) => void;
-  darkMode?: boolean;
 };
 
-export default function FileUploader({ onResult, darkMode = true }: FileUploaderProps) {
+export default function FileUploader({ onResult }: FileUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [displayProgress, setDisplayProgress] = useState(0);
   const [statusText, setStatusText] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  // Smooth progress animation
+  // Smooth, fake-ish progress animation (UX candy)
   useEffect(() => {
     if (!loading) return;
 
@@ -27,10 +25,12 @@ export default function FileUploader({ onResult, darkMode = true }: FileUploader
       lastTime = now;
 
       setDisplayProgress((prev) => {
+        // Target "pre-finish" max
         const target = 80;
         if (prev >= target) return prev;
 
-        const incrementPerMs = 0.015;
+        // Speed: 10–20% per second, but small steps
+        const incrementPerMs = 0.015; // tweak feel here
         const increment = delta * incrementPerMs;
 
         const next = prev + increment;
@@ -59,7 +59,7 @@ export default function FileUploader({ onResult, darkMode = true }: FileUploader
     setSelectedFiles(fileArray);
     setLoading(true);
     setDisplayProgress(5);
-    setStatusText("Processing...");
+    setStatusText("Uploading & parsing files...");
 
     try {
       const formData = new FormData();
@@ -76,21 +76,24 @@ export default function FileUploader({ onResult, darkMode = true }: FileUploader
 
       if (!res.ok) {
         console.error("Upload error:", data);
-        setStatusText(data.error || "Something went wrong");
+        setStatusText(data.error || "Something went wrong while parsing.");
         setLoading(false);
         setDisplayProgress(0);
         return;
       }
 
+      // Snap to 100% for nice UX
       setDisplayProgress(100);
-      setStatusText("Complete");
+      setStatusText("Identity graph extracted.");
 
+      // Pass result up
       onResult({
         profileText: data.profileText,
         profileJson: data.profileJson,
-        source: data.source,
+        source: data.source, // Pass detected source
       });
 
+      // Let user see 100% briefly, then reset bar but keep result visible
       setTimeout(() => {
         setDisplayProgress(0);
         setStatusText(null);
@@ -138,18 +141,14 @@ export default function FileUploader({ onResult, darkMode = true }: FileUploader
     setSelectedFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
+  const borderStyle = isDragging
+    ? "border-2 border-dashed border-purple-500 glass"
+    : "border-2 border-dashed border-white/20 glass hover:border-purple-400/50";
+
   return (
     <div className="w-full space-y-4">
       <div
-        className={`rounded-2xl p-12 cursor-pointer border-2 transition-all ${
-          isDragging
-            ? darkMode
-              ? "border-white bg-white/5"
-              : "border-black bg-black/5"
-            : darkMode
-            ? "border-white/20 hover:border-white/40"
-            : "border-black/20 hover:border-black/40"
-        }`}
+        className={`rounded-3xl p-8 cursor-pointer transition-smooth hover-glow ${borderStyle}`}
         onDrop={onDrop}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -170,49 +169,38 @@ export default function FileUploader({ onResult, darkMode = true }: FileUploader
           accept=".txt,.json,.md,.zip"
         />
 
-        <div className="flex flex-col items-center justify-center text-center gap-4">
-          <div className={`w-16 h-16 rounded-full border-2 flex items-center justify-center ${
-            darkMode ? "border-white/20" : "border-black/20"
-          }`}>
-            <Upload className="w-8 h-8" />
+        <div className="flex flex-col items-center justify-center text-center gap-3">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-3xl shadow-lg">
+            📂
           </div>
-
           <div>
-            <p className="text-xl font-medium mb-2">
-              Drop your AI exports here
+            <p className="text-base font-medium">
+              Drag & drop your AI chat exports here
             </p>
-            <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
+            <p className="text-sm opacity-70 mt-2">
               ChatGPT • Claude • Gemini
             </p>
-            <p className={`text-xs mt-2 ${darkMode ? "text-gray-500" : "text-gray-500"}`}>
+            <p className="text-xs opacity-50 mt-1">
               Supports: .zip, .json, .txt, .md
             </p>
           </div>
 
           {selectedFiles.length > 0 && !loading && (
-            <div className={`mt-4 w-full max-w-md text-left text-sm border rounded-xl p-4 ${
-              darkMode ? "border-white/20 bg-white/5" : "border-black/20 bg-black/5"
-            }`}>
-              <p className="font-semibold mb-3">Selected files:</p>
-              <ul className="max-h-32 overflow-auto space-y-2">
+            <div className="mt-2 w-full max-w-sm text-left text-xs text-neutral-600 bg-white/70 border border-neutral-200 rounded-lg p-3">
+              <p className="font-semibold mb-2">Selected files:</p>
+              <ul className="max-h-32 overflow-auto space-y-1">
                 {selectedFiles.map((file, idx) => (
                   <li key={idx} className="flex items-center justify-between gap-2 group">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <File className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">{file.name}</span>
-                    </div>
+                    <span className="truncate flex-1">{file.name}</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         removeFile(idx);
                       }}
-                      className={`flex-shrink-0 transition-all ${
-                        darkMode
-                          ? "text-gray-400 hover:text-white"
-                          : "text-gray-600 hover:text-black"
-                      }`}
+                      className="opacity-60 hover:opacity-100 hover:text-red-600 transition-all flex-shrink-0"
+                      title="Remove file"
                     >
-                      <X className="w-4 h-4" />
+                      ✕
                     </button>
                   </li>
                 ))}
@@ -223,9 +211,7 @@ export default function FileUploader({ onResult, darkMode = true }: FileUploader
                     e.stopPropagation();
                     setSelectedFiles([]);
                   }}
-                  className={`mt-3 text-xs font-medium ${
-                    darkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-black"
-                  }`}
+                  className="mt-2 text-xs text-purple-600 hover:text-purple-700 font-medium"
                 >
                   Clear all
                 </button>
@@ -235,31 +221,34 @@ export default function FileUploader({ onResult, darkMode = true }: FileUploader
         </div>
       </div>
 
-      {/* Progress */}
+      {/* Progress + status */}
       {(loading || displayProgress > 0 || statusText) && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className={darkMode ? "text-gray-400" : "text-gray-600"}>
-              {statusText || "Processing..."}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-neutral-600">
+              {statusText || (loading ? "Processing..." : "Ready")}
             </span>
             {displayProgress > 0 && (
-              <span className={darkMode ? "text-gray-500" : "text-gray-500"}>
-                {Math.round(displayProgress)}%
-              </span>
+              <span className="text-neutral-500">{Math.round(displayProgress)}%</span>
             )}
           </div>
-          <div className={`w-full h-1 rounded-full overflow-hidden ${
-            darkMode ? "bg-white/10" : "bg-black/10"
-          }`}>
+          <div className="w-full h-2 rounded-full bg-neutral-200 overflow-hidden">
             <div
-              className={`h-full transition-all duration-200 ${
-                darkMode ? "bg-white" : "bg-black"
-              }`}
+              className="h-full rounded-full bg-neutral-900 transition-[width] duration-200 ease-out"
               style={{ width: `${displayProgress}%` }}
             />
           </div>
         </div>
       )}
+
+      {/* Reset / hint */}
+      {!loading && selectedFiles.length === 0 && (
+        <p className="text-[11px] text-neutral-500">
+          Tip: start with your full ChatGPT export ZIP to build a dense identity
+          graph in one go.
+        </p>
+      )}
     </div>
   );
 }
+

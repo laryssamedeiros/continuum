@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 1) Parse all uploaded files into a unified plain-text history
-    const unifiedHistory = await parseUploadedFiles(uploadFiles);
+    const { text: unifiedHistory, source } = await parseUploadedFiles(uploadFiles);
 
     if (!unifiedHistory || !unifiedHistory.trim()) {
       return NextResponse.json(
@@ -189,9 +189,11 @@ User AI history:
           _meta: {
             truncated,
             sourceType: "multi-file",
+            detectedSource: source, // chatgpt, claude, gemini, or unknown
           },
         },
         profileText,
+        source, // Pass to frontend
       },
       { status: 200 }
     );
