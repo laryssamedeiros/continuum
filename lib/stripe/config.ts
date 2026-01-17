@@ -35,6 +35,9 @@ export const stripe = {
   get subscriptions() {
     return getStripeClient().subscriptions;
   },
+  get webhooks() {
+    return getStripeClient().webhooks;
+  },
   constructEvent(...args: Parameters<Stripe['constructEvent']>) {
     return getStripeClient().constructEvent(...args);
   },
