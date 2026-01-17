@@ -28,9 +28,16 @@ CREATE INDEX IF NOT EXISTS idx_api_keys_key_hash ON api_keys(key_hash);
 CREATE TABLE IF NOT EXISTS identity_graphs (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
-  profile_json TEXT NOT NULL, -- JSON string of the identity graph
-  profile_text TEXT, -- Plain text representation
+  profile_json TEXT NOT NULL, -- JSON string of the identity graph (or encrypted data)
+  profile_text TEXT, -- Plain text representation (optional)
   version INTEGER NOT NULL DEFAULT 1,
+
+  -- Encryption fields (optional - null if not encrypted)
+  is_encrypted INTEGER DEFAULT 0, -- Boolean: 1 = encrypted, 0 = plain text
+  encryption_salt TEXT, -- Base64-encoded salt for key derivation
+  encryption_iv TEXT, -- Base64-encoded initialization vector
+  passphrase_verification_hash TEXT, -- SHA-256 hash for passphrase verification
+
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

@@ -128,6 +128,10 @@ export interface IdentityGraph {
   profile_json: string;
   profile_text: string | null;
   version: number;
+  is_encrypted: number; // 0 = false, 1 = true
+  encryption_salt: string | null;
+  encryption_iv: string | null;
+  passphrase_verification_hash: string | null;
   created_at: number;
   updated_at: number;
 }
@@ -135,7 +139,13 @@ export interface IdentityGraph {
 export function saveIdentityGraph(
   userId: string,
   profileJson: any,
-  profileText?: string
+  profileText?: string,
+  encryptionData?: {
+    isEncrypted: boolean;
+    salt?: string;
+    iv?: string;
+    verificationHash?: string;
+  }
 ): IdentityGraph {
   const db = getDb();
   const now = Date.now();
@@ -143,11 +153,28 @@ export function saveIdentityGraph(
   // Check if user already has a graph
   const existing = db.prepare("SELECT * FROM identity_graphs WHERE user_id = ?").get(userId) as IdentityGraph | null;
 
+  const isEncrypted = encryptionData?.isEncrypted ? 1 : 0;
+  const salt = encryptionData?.salt || null;
+  const iv = encryptionData?.iv || null;
+  const verificationHash = encryptionData?.verificationHash || null;
+
   if (existing) {
     // Update existing
     db.prepare(
-      "UPDATE identity_graphs SET profile_json = ?, profile_text = ?, version = version + 1, updated_at = ? WHERE user_id = ?"
-    ).run(JSON.stringify(profileJson), profileText || null, now, userId);
+      `UPDATE identity_graphs
+       SET profile_json = ?, profile_text = ?, version = version + 1, updated_at = ?,
+           is_encrypted = ?, encryption_salt = ?, encryption_iv = ?, passphrase_verification_hash = ?
+       WHERE user_id = ?`
+    ).run(
+      JSON.stringify(profileJson),
+      profileText || null,
+      now,
+      isEncrypted,
+      salt,
+      iv,
+      verificationHash,
+      userId
+    );
 
     return db.prepare("SELECT * FROM identity_graphs WHERE user_id = ?").get(userId) as IdentityGraph;
   } else {
@@ -156,10 +183,36 @@ export function saveIdentityGraph(
     const id = nanoid();
 
     db.prepare(
-      "INSERT INTO identity_graphs (id, user_id, profile_json, profile_text, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    ).run(id, userId, JSON.stringify(profileJson), profileText || null, 1, now, now);
+      `INSERT INTO identity_graphs
+       (id, user_id, profile_json, profile_text, version, is_encrypted, encryption_salt, encryption_iv, passphrase_verification_hash, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      id,
+      userId,
+      JSON.stringify(profileJson),
+      profileText || null,
+      1,
+      isEncrypted,
+      salt,
+      iv,
+      verificationHash,
+      now,
+      now
+    );
 
-    return { id, user_id: userId, profile_json: JSON.stringify(profileJson), profile_text: profileText || null, version: 1, created_at: now, updated_at: now };
+    return {
+      id,
+      user_id: userId,
+      profile_json: JSON.stringify(profileJson),
+      profile_text: profileText || null,
+      version: 1,
+      is_encrypted: isEncrypted,
+      encryption_salt: salt,
+      encryption_iv: iv,
+      passphrase_verification_hash: verificationHash,
+      created_at: now,
+      updated_at: now,
+    };
   }
 }
 
