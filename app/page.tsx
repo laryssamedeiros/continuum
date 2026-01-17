@@ -3,6 +3,7 @@
 import { useState } from "react";
 import FileUploader from "./components/FileUploader";
 import ExportHistory from "./components/ExportHistory";
+import ExportGuide from "./components/ExportGuide";
 import InfinityAnimation from "./components/InfinityAnimation";
 import { saveExport } from "@/lib/exportHistory";
 import { ArrowRight, Download, Upload, Sparkles, Shield, Layers, Moon, Sun } from "lucide-react";
@@ -333,6 +334,7 @@ function HomePage_Content({
               </p>
             </div>
 
+            <ExportGuide darkMode={darkMode} />
             <ExportHistory onMergedProfile={handleDataProcessed} />
             <FileUploader onResult={handleDataProcessed} />
           </div>
