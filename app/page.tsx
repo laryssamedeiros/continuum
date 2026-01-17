@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import FileUploader from "./components/FileUploader";
 import ChatSandbox from "./components/ChatSandbox";
 import ApiKeyManager from "./components/ApiKeyManager";
+import EncryptionManager from "./components/EncryptionManager";
 
 const IdentityNodeGraph = dynamic(
   () => import("./components/IdentityNodeGraph"),
@@ -1295,6 +1296,21 @@ const chipClasses = darkMode
               identity graph looks.
             </p>
             <pre className={preClasses}>{insightText}</pre>
+          </section>
+        )}
+
+        {/* Encryption Manager */}
+        {activeJson && (
+          <section className="w-full max-w-4xl">
+            <EncryptionManager
+              profileJson={activeJson}
+              darkMode={darkMode}
+              onEncryptionComplete={(encrypted) => {
+                showToast("Identity graph encrypted successfully! Your data is now protected.", "success");
+                console.log("Encrypted data:", encrypted);
+                // You can save this to the server or keep it local-only
+              }}
+            />
           </section>
         )}
 
