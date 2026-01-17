@@ -1103,7 +1103,7 @@ const chipClasses = darkMode
       </section>
 
       {/* Results container (for auto-scroll) */}
-      <div ref={resultsRef} className="w-full flex flex-col items-center">
+      <div ref={resultsRef} className="w-full flex flex-col items-center gap-8">
         {/* Memory Profile */}
         {activeProfile?.profileText && (
           <section className={cardClasses}>

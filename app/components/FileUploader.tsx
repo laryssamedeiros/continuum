@@ -137,13 +137,13 @@ export default function FileUploader({ onResult }: FileUploaderProps) {
   };
 
   const borderStyle = isDragging
-    ? "border-2 border-dashed border-emerald-500 bg-emerald-50/40"
-    : "border-2 border-dashed border-neutral-300 hover:border-neutral-400 bg-neutral-50/60";
+    ? "border-2 border-dashed border-purple-500 glass"
+    : "border-2 border-dashed border-white/20 glass hover:border-purple-400/50";
 
   return (
-    <div className="w-full max-w-2xl space-y-3">
+    <div className="w-full space-y-4">
       <div
-        className={`rounded-xl p-5 cursor-pointer transition-colors ${borderStyle}`}
+        className={`rounded-3xl p-8 cursor-pointer transition-smooth hover-glow ${borderStyle}`}
         onDrop={onDrop}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -164,19 +164,19 @@ export default function FileUploader({ onResult }: FileUploaderProps) {
           accept=".txt,.json,.md,.zip"
         />
 
-        <div className="flex flex-col items-center justify-center text-center gap-2">
-          <div className="h-10 w-10 rounded-full bg-white shadow flex items-center justify-center text-xl">
+        <div className="flex flex-col items-center justify-center text-center gap-3">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-3xl shadow-lg">
             📂
           </div>
           <div>
-            <p className="text-sm font-medium">
-              Drag & drop your ChatGPT export (ZIP or JSON), or click to browse
+            <p className="text-base font-medium">
+              Drag & drop your AI chat exports here
             </p>
-            <p className="text-xs text-neutral-500 mt-1">
-              Supports: <span className="font-mono">.zip</span>,{" "}
-              <span className="font-mono">.json</span>,{" "}
-              <span className="font-mono">.txt</span>,{" "}
-              <span className="font-mono">.md</span>
+            <p className="text-sm opacity-70 mt-2">
+              ChatGPT • Claude • Gemini
+            </p>
+            <p className="text-xs opacity-50 mt-1">
+              Supports: .zip, .json, .txt, .md
             </p>
           </div>
 
