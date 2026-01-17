@@ -669,12 +669,12 @@ export default function HomePage() {
   }, [activeJson]);
 
   const mainClasses = darkMode
-  ? "min-h-screen w-full flex flex-col items-center p-8 gap-6 bg-[#050816] text-slate-50"
-  : "min-h-screen w-full flex flex-col items-center p-8 gap-6 bg-neutral-50 text-neutral-900";
+  ? "min-h-screen w-full flex flex-col items-center px-6 py-12 gap-8 dark-gradient text-slate-50"
+  : "min-h-screen w-full flex flex-col items-center px-6 py-12 gap-8 light-gradient text-neutral-900";
 
 const cardClasses = darkMode
-  ? "w-full max-w-4xl mt-10 space-y-3 bg-[#0b1020] border border-slate-800 rounded-2xl p-5 shadow-[0_18px_45px_rgba(0,0,0,0.55)]"
-  : "w-full max-w-4xl mt-10 space-y-3 bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm";
+  ? "w-full max-w-5xl space-y-4 glass rounded-3xl p-8 shadow-2xl hover-glow transition-smooth animate-fade-in"
+  : "w-full max-w-5xl space-y-4 glass-light rounded-3xl p-8 shadow-xl hover-glow transition-smooth animate-fade-in";
 
 const preClasses = darkMode
   ? "bg-[#020617] text-slate-100 p-4 rounded-xl border border-slate-800 whitespace-pre-wrap text-sm"
@@ -974,85 +974,114 @@ const chipClasses = darkMode
 
   return (
     <main className={mainClasses}>
-      {/* Top bar / hero */}
-      <header className="w-full max-w-4xl flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-black text-white flex items-center justify-center text-xs font-bold">
+      {/* Hero Section */}
+      <header className="w-full max-w-5xl flex flex-col items-center text-center mb-8 animate-fade-in">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
             C
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold">Continuum</h1>
-              <span className="px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wide">
-                Beta
-              </span>
-            </div>
-            <p className="text-xs opacity-70">
-              Import your AI history once. Get a portable identity you can plug
-              into any model.
-            </p>
-          </div>
         </div>
-        <button
-          onClick={() => setDarkMode((v) => !v)}
-          className="text-xs px-3 py-1 rounded-full border border-neutral-400 hover:bg-neutral-100 transition"
-        >
-          {darkMode ? "Switch to Light" : "Switch to Dark"}
-        </button>
+        <h1 className="text-5xl font-bold mb-3 gradient-text">
+          Continuum
+        </h1>
+        <p className="text-lg opacity-80 max-w-2xl mb-6">
+          Your AI memory, owned by you, portable everywhere
+        </p>
+        <div className="flex items-center gap-3">
+          <span className={`px-4 py-1.5 rounded-full text-xs font-medium ${
+            darkMode
+              ? 'glass text-purple-300'
+              : 'glass-light text-purple-700'
+          }`}>
+            ✨ End-to-End Encrypted
+          </span>
+          <span className={`px-4 py-1.5 rounded-full text-xs font-medium ${
+            darkMode
+              ? 'glass text-slate-300'
+              : 'glass-light text-slate-700'
+          }`}>
+            🚀 Beta
+          </span>
+          <button
+            onClick={() => setDarkMode((v) => !v)}
+            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-smooth ${
+              darkMode
+                ? 'glass hover:bg-white/10'
+                : 'glass-light hover:bg-black/5'
+            }`}
+          >
+            {darkMode ? '☀️ Light' : '🌙 Dark'}
+          </button>
+        </div>
       </header>
 
       {/* Profile switcher */}
-      <section className="w-full max-w-4xl flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[11px] uppercase tracking-wide opacity-60">
-            Profiles
-          </span>
-          {profiles.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => {
-                setActiveProfileId(p.id);
-                setEditMode(false);
-                setDraftProfile(null);
-              }}
-              className={`px-3 py-1 text-xs rounded-full border transition ${
-                p.id === activeProfileId
-                  ? "bg-black text-white border-black"
-                  : "bg-transparent border-neutral-300 hover:bg-neutral-100"
-              }`}
-            >
-              {p.name}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <button
-            onClick={renameActiveProfile}
-            className="px-2 py-1 rounded-full border border-neutral-300 hover:bg-neutral-100"
-          >
-            Rename
-          </button>
-          <button
-            onClick={deleteActiveProfile}
-            className={`px-2 py-1 rounded-full border ${
-              profiles.length === 1
-                ? "border-neutral-200 text-neutral-300 cursor-not-allowed"
-                : "border-red-300 text-red-600 hover:bg-red-50"
-            }`}
-          >
-            Delete
-          </button>
-          <button
-            onClick={createNewProfile}
-            className="px-3 py-1 rounded-full bg-black text-white hover:bg-neutral-900"
-          >
-            + New
-          </button>
-        </div>
-      </section>
+      {profiles.length > 1 && (
+        <section className={`w-full max-w-5xl mb-6 ${cardClasses}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-xs font-medium opacity-60">Profiles:</span>
+              {profiles.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => {
+                    setActiveProfileId(p.id);
+                    setEditMode(false);
+                    setDraftProfile(null);
+                  }}
+                  className={`px-4 py-2 text-sm rounded-xl transition-smooth ${
+                    p.id === activeProfileId
+                      ? darkMode
+                        ? "bg-purple-600 text-white shadow-lg"
+                        : "bg-purple-500 text-white shadow-lg"
+                      : darkMode
+                      ? "glass hover:bg-white/10"
+                      : "glass-light hover:bg-black/5"
+                  }`}
+                >
+                  {p.name}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <button
+                onClick={renameActiveProfile}
+                className={`px-3 py-2 rounded-xl transition-smooth ${
+                  darkMode ? 'glass hover:bg-white/10' : 'glass-light hover:bg-black/5'
+                }`}
+              >
+                ✏️
+              </button>
+              <button
+                onClick={deleteActiveProfile}
+                disabled={profiles.length === 1}
+                className={`px-3 py-2 rounded-xl transition-smooth ${
+                  profiles.length === 1
+                    ? "opacity-30 cursor-not-allowed"
+                    : darkMode
+                    ? "glass hover:bg-red-500/20 text-red-400"
+                    : "glass-light hover:bg-red-500/10 text-red-600"
+                }`}
+              >
+                🗑️
+              </button>
+              <button
+                onClick={createNewProfile}
+                className={`px-4 py-2 rounded-xl font-medium transition-smooth ${
+                  darkMode
+                    ? 'bg-purple-600 hover:bg-purple-500 text-white'
+                    : 'bg-purple-500 hover:bg-purple-600 text-white'
+                }`}
+              >
+                + New
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Uploader */}
-      <section className="w-full max-w-4xl">
+      <section className="w-full max-w-5xl">
         <FileUploader
           onResult={(data) => {
             if (!activeProfile) return;
