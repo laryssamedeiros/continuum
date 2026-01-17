@@ -13,11 +13,32 @@
 
 import Stripe from "stripe";
 
-// Initialize Stripe (server-side only)
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-12-15.clover" as any,
-  typescript: true,
-});
+// Lazy-load Stripe client to avoid build-time errors
+function getStripeClient() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("STRIPE_SECRET_KEY is not set");
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2025-12-15.clover" as any,
+    typescript: true,
+  });
+}
+
+// For backward compatibility
+export const stripe = {
+  get checkout() {
+    return getStripeClient().checkout;
+  },
+  get billingPortal() {
+    return getStripeClient().billingPortal;
+  },
+  get subscriptions() {
+    return getStripeClient().subscriptions;
+  },
+  constructEvent(...args: Parameters<Stripe['constructEvent']>) {
+    return getStripeClient().constructEvent(...args);
+  },
+};
 
 /**
  * Product and Price IDs
