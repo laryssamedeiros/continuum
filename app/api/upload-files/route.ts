@@ -154,22 +154,24 @@ User AI history:
     // Add timeout to fail fast on Vercel free tier (10s limit)
     const openai = getOpenAIClient();
 
-    const completionPromise = openai.chat.completions.create({
-      model: "gpt-4.1-mini",
-      temperature: 0.1,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "You extract a user's identity and preferences from messy history text. You MUST return strictly valid JSON.",
-        },
-        { role: "user", content: prompt },
-      ],
-      timeout: 8000, // 8 second timeout for OpenAI API call
-    });
-
-    const completion = await completionPromise;
+    const completion = await openai.chat.completions.create(
+      {
+        model: "gpt-4.1-mini",
+        temperature: 0.1,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              "You extract a user's identity and preferences from messy history text. You MUST return strictly valid JSON.",
+          },
+          { role: "user", content: prompt },
+        ],
+      },
+      {
+        timeout: 8000, // 8 second timeout for OpenAI API call
+      }
+    );
 
     const content = completion.choices[0]?.message?.content;
     if (!content) {
